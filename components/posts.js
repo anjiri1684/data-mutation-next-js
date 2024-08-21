@@ -1,12 +1,12 @@
+/* eslint-disable @next/next/no-img-element */
 import { formatDate } from "@/lib/format";
 import LikeButton from "./like-icon";
-import Image from "next/image";
 
 function Post({ post }) {
   return (
     <article className="post">
       <div className="post-image">
-        <Image src={post.image} alt={post.title} />
+        <img src={post.image} alt={post.title} />
       </div>
       <div className="post-content">
         <header>

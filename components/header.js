@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 import logo from "../assets/logo.png";
 import Link from "next/link";
@@ -6,7 +7,7 @@ export default function Header() {
   return (
     <header id="main-header">
       <Link href="/">
-        <Image src={logo} alt="Mobile phone with posts feed on it" priority />
+        <img src={logo} alt="Mobile phone with posts feed on it" priority />
       </Link>
       <nav>
         <ul>
