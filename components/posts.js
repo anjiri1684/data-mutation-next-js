@@ -1,8 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
+"use client";
+
+import { useOptimistic } from "react";
+
 import { formatDate } from "@/lib/format";
 import LikeButton from "./like-icon";
+import { togglePostLikeStatus } from "@/actions/posts";
 
-function Post({ post }) {
+function Post({ post, action }) {
   return (
     <article className="post">
       <div className="post-image">
@@ -20,7 +25,12 @@ function Post({ post }) {
             </p>
           </div>
           <div>
-            <LikeButton />
+            <form
+              action={action.bind(null, post.id)}
+              className={post.isLiked ? "liked" : ""}
+            >
+              <LikeButton />
+            </form>
           </div>
         </header>
         <p>{post.content}</p>
@@ -30,15 +40,40 @@ function Post({ post }) {
 }
 
 export default function Posts({ posts }) {
-  if (!posts || posts.length === 0) {
+  const [optimisticPosts, updateOptimisticPost] = useOptimistic(
+    posts,
+    (prevPosts, updatedPostId) => {
+      const updatedPostsIndex = prevPosts.findIndex(
+        (post) => post.id === updatedPostId
+      );
+
+      if (updatedPostsIndex === -1) {
+        return prevPosts;
+      }
+
+      const updatedPost = { ...prevPosts[updatedPostsIndex] };
+      updatedPost.likes = updatedPost.likes + (updatedPost.isLiked ? -1 : 1);
+      updatedPost.isLiked = !updatedPost.isLiked;
+      const newPost = [...prevPosts];
+      newPost[updatedPostsIndex] = updatedPost;
+      return newPost;
+    }
+  );
+
+  if (!optimisticPosts || optimisticPosts.length === 0) {
     return <p>There are no posts yet. Maybe start sharing some?</p>;
+  }
+
+  async function updatePost(postId) {
+    updateOptimisticPost(postId);
+    await togglePostLikeStatus(postId);
   }
 
   return (
     <ul className="posts">
-      {posts.map((post) => (
+      {optimisticPosts.map((post) => (
         <li key={post.id}>
-          <Post post={post} />
+          <Post post={post} action={updatePost} />
         </li>
       ))}
     </ul>
